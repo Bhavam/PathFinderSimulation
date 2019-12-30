@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Grid : MonoBehaviour
 {
+ public bool onlyDisplayPathGizmos;
  public Transform player;
  public LayerMask unwalkableMask; // layer to mark as unwalkable areas 
  public Vector2 gridWorldSize; // world size parameters
@@ -54,6 +56,12 @@ public class Grid : MonoBehaviour
    } 
    return neighbours;
  } 
+ public int MaxSize
+ {
+     get{
+         return gridSizeX*gridSizeY;
+     }
+ }
  public Node NodeFromWorldPoint(Vector3 worldPosition)
  {
      float percentX=(worldPosition.x+gridWorldSize.x/2)/gridWorldSize.x;
@@ -69,25 +77,38 @@ public class Grid : MonoBehaviour
  void OnDrawGizmos()
  {
      Gizmos.DrawWireCube(transform.position,new Vector3(gridWorldSize.x,1,gridWorldSize.y)); // creation parameters for Wire Cube
-     if(grid != null)
+     if(onlyDisplayPathGizmos)
      {
-         Node playerNode=NodeFromWorldPoint(player.position); // assign the player node
-         foreach(Node n in grid)
-         {
-             Gizmos.color=(n.walkable)?Color.white:Color.red; // assigns the color of the gizmos used for the given node 
-             if(playerNode==n)
-                {
-
-                   Gizmos.color=Color.cyan;
-                }
-             if(path!=null)
-             {
-                 if(path.Contains(n))
-                    Gizmos.color=Color.black;
+         if(path!=null){
+             foreach (Node n in path){
+                 Gizmos.color=Color.black;
+                  Gizmos.DrawCube(n.worldPosition,Vector3.one*(nodeDiameter-.1f));
              }
-             Gizmos.DrawCube(n.worldPosition,Vector3.one*(nodeDiameter-.1f)); // creates cubical gizmo for a given position and diameter
+         }
+         else
+         {
+            if(grid != null)
+              {
+                 Node playerNode=NodeFromWorldPoint(player.position); // assign the player node
+                 foreach(Node n in grid)
+                     {
+                       Gizmos.color=(n.walkable)?Color.white:Color.red; // assigns the color of the gizmos used for the given node 
+                       if(playerNode==n)
+                         {
+
+                           Gizmos.color=Color.cyan;
+                         }
+                       if(path!=null)
+                         {
+                            if(path.Contains(n))
+                              Gizmos.color=Color.black;
+                         }
+                      Gizmos.DrawCube(n.worldPosition,Vector3.one*(nodeDiameter-.1f)); // creates cubical gizmo for a given position and diameter
+                     } 
+               } 
          }
      }
+     
  }
 }
 
