@@ -30,11 +30,31 @@ public class Grid : MonoBehaviour
           {
              Vector3 worldPoint=worldBottomLeft+Vector3.right*(x*nodeDiameter+nodeRadius)+Vector3.forward*(y*nodeDiameter+nodeRadius); // defining the points starting from the bottom left
              bool walkable=!(Physics.CheckSphere(worldPoint,nodeRadius,unwalkableMask)); // checks against the layer masks for the given node obj and radius
-             grid[x,y]=new Node(walkable,worldPoint); // creating a grid with the given bool conditions for each node and position
+             grid[x,y]=new Node(walkable,worldPoint,x,y); // creating a grid with the given bool conditions for each node and position
           }
       }
  }
- Node NodeFromWorldPoint(Vector3 worldPosition)
+ public List<Node> GetNeighbours(Node node)
+ {
+   List<Node> neighbours=new List<Node>();
+   for(int x=-1;x<=1;x++)
+   {
+       for(int y=-1;y<=1;y++)
+       {
+           if(x==0 && y==0)
+           continue;
+           int checkX=node.gridX+x;
+           int checkY=node.gridY+y;
+
+           if(checkX >= 0 && checkX< gridSizeX && checkY >=0 && checkY < gridSizeY)
+           {
+               neighbours.Add(grid[checkX,checkY]);
+           }
+       } 
+   } 
+   return neighbours;
+ } 
+ public Node NodeFromWorldPoint(Vector3 worldPosition)
  {
      float percentX=(worldPosition.x+gridWorldSize.x/2)/gridWorldSize.x;
      float percentY=(worldPosition.z+gridWorldSize.y/2)/gridWorldSize.y;
@@ -45,6 +65,7 @@ public class Grid : MonoBehaviour
 	 int y = Mathf.RoundToInt((gridSizeY-1) * percentY);
 	 return grid[x,y];
  }
+ public List<Node> path;
  void OnDrawGizmos()
  {
      Gizmos.DrawWireCube(transform.position,new Vector3(gridWorldSize.x,1,gridWorldSize.y)); // creation parameters for Wire Cube
@@ -59,19 +80,14 @@ public class Grid : MonoBehaviour
 
                    Gizmos.color=Color.cyan;
                 }
+             if(path!=null)
+             {
+                 if(path.Contains(n))
+                    Gizmos.color=Color.black;
+             }
              Gizmos.DrawCube(n.worldPosition,Vector3.one*(nodeDiameter-.1f)); // creates cubical gizmo for a given position and diameter
          }
      }
  }
 }
 
-public class Node  // wasnt working as a seperate script
-{
-  public bool walkable;
-  public Vector3 worldPosition;
-   public Node(bool _walkable,Vector3 _worldPos)
-   {
-      walkable=_walkable;
-      worldPosition=_worldPos;
-   }
-}
